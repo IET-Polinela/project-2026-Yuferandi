@@ -1,16 +1,85 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Contacts</title>
+<title>Contacts - Axel City Report</title>
+
+<style>
+body{
+    margin:0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(#6dd5fa, #2980b9);
+    color:white;
+}
+
+.container{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+}
+
+h1{
+    font-size:50px;
+    margin-bottom:30px;
+}
+
+.contact-box{
+    background: rgba(0,0,0,0.3);
+    padding:30px 40px;
+    border-radius:10px;
+    margin-bottom:30px;
+}
+
+p{
+    font-size:18px;
+}
+
+.menu a{
+    text-decoration:none;
+    color:white;
+    background:#2ecc71;
+    padding:10px 25px;
+    margin:10px;
+    border-radius:6px;
+}
+
+.menu a:hover{
+    background:#27ae60;
+    transform:scale(1.1);
+}
+
+footer{
+    position:absolute;
+    bottom:20px;
+    width:100%;
+    text-align:center;
+}
+</style>
 </head>
+
 <body>
 
-<h1>Halaman Contacts</h1>
-<p>Email: yuferyandi1002@gmail.com</p>
-<p>Telepon: 081532718911</p>
+<div class="container">
 
-<a href="/">Home</a><br>
+<h1>Contact Axel City Administration</h1>
+
+<div class="contact-box">
+<p><strong>Email:</strong> yuferyandi1002@gmail.com</p>
+<p><strong>Telepon:</strong> 081532718911</p>
+</div>
+
+<div class="menu">
+<a href="/">Home</a>
 <a href="/about/">About</a>
+</div>
+
+</div>
+
+<footer>
+Axel City Smart Governance System
+</footer>
 
 </body>
 </html>

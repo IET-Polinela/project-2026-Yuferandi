@@ -1,15 +1,100 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>About</title>
+<title>About - Axel City Report</title>
+
+<style>
+body{
+    margin:0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(#6dd5fa, #2980b9);
+    color:white;
+}
+
+.container{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:20px;
+}
+
+h1{
+    font-size:50px;
+    margin-bottom:30px;
+}
+
+.about-box{
+    background: rgba(0,0,0,0.3);
+    padding:30px 40px;
+    border-radius:10px;
+    max-width:700px;
+    line-height:1.6;
+    margin-bottom:30px;
+}
+
+.menu a{
+    text-decoration:none;
+    color:white;
+    background:#2ecc71;
+    padding:10px 25px;
+    margin:10px;
+    border-radius:6px;
+}
+
+.menu a:hover{
+    background:#27ae60;
+    transform:scale(1.1);
+}
+
+footer{
+    position:absolute;
+    bottom:20px;
+    width:100%;
+    text-align:center;
+}
+</style>
 </head>
+
 <body>
 
-<h1>Halaman About</h1>
-<p>Website ini dibuat menggunakan Django Framework.</p>
+<div class="container">
 
-<a href="/">Home</a><br>
+<h1>About Axel City Report</h1>
+
+<div class="about-box">
+
+<p>
+Axel City Report adalah aplikasi berbasis web yang dirancang untuk membantu
+warga melaporkan berbagai permasalahan di lingkungan kota.
+</p>
+
+<p>
+Melalui sistem ini, warga dapat melaporkan masalah seperti jalan rusak,
+lampu jalan mati, sampah menumpuk, banjir lokal, atau fasilitas umum yang
+bermasalah sehingga dapat segera ditindaklanjuti oleh pihak pengelola kota.
+</p>
+
+<p>
+Dengan adanya sistem pelaporan yang terstruktur dan transparan,
+Axel City dapat berkembang menjadi kota yang lebih responsif,
+aman, dan nyaman bagi seluruh warga.
+</p>
+
+</div>
+
+<div class="menu">
+<a href="/">Home</a>
 <a href="/contacts/">Contacts</a>
+</div>
+
+</div>
+
+<footer>
+Axel City Smart Governance System
+</footer>
 
 </body>
 </html>
