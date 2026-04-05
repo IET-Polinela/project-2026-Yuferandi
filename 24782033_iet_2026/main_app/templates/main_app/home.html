@@ -9,7 +9,7 @@ body{
     margin:0;
     font-family: Arial, Helvetica, sans-serif;
     background: 
-        linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)),
+        linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)),
         url("{% static 'images/axel.png' %}");
     background-size: cover;
     background-position: center;
@@ -18,7 +18,7 @@ body{
 }
 
 .container{
-    height:100vh;
+    min-height:100vh; /* FIX BACKGROUND */
     display:flex;
     flex-direction:column;
     justify-content:center;
@@ -39,12 +39,14 @@ h1{
 }
 
 .box{
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.6);
     padding:30px 40px;
     border-radius:10px;
     max-width:700px;
+    width:100%;
     line-height:1.6;
     margin-bottom:30px;
+    box-shadow:0px 0px 15px rgba(0,0,0,0.5);
 }
 
 .menu a{
@@ -63,11 +65,20 @@ h1{
     transform:scale(1.1);
 }
 
+.btn{
+    padding:5px 10px;
+    border-radius:5px;
+    text-decoration:none;
+    font-size:14px;
+}
+
+.edit{ color:#f1c40f; }
+.delete{ color:#e74c3c; }
+.process{ color:#3498db; }
+.accept{ color:#2ecc71; }
+
 footer{
-    position:absolute;
-    bottom:20px;
-    width:100%;
-    text-align:center;
+    margin-top:20px;
     font-size:14px;
 }
 </style>
@@ -96,16 +107,67 @@ efisien demi menciptakan lingkungan kota yang lebih baik.
 </p>
 </div>
 
+<div class="box">
+
+<h2>Daftar Laporan Kota</h2>
+
+<a href="/add/" style="display:inline-block; margin-bottom:15px; background:#e74c3c; padding:10px 20px; border-radius:5px; text-decoration:none; color:white;">
++ Tambah Laporan
+</a>
+
+<ul style="list-style:none; padding:0;">
+
+{% for report in reports %}
+<li style="margin-bottom:15px; padding:15px; background:rgba(255,255,255,0.1); border-radius:8px;">
+
+<b>{{ report.title }}</b> ({{ report.category }})<br>
+
+<!-- STATUS WARNA -->
+<b>Status:</b>
+{% if report.status == "REPORTED" %}
+    <span style="color:#e74c3c;">{{ report.status }}</span>
+{% elif report.status == "PROCESS" %}
+    <span style="color:#f1c40f;">{{ report.status }}</span>
+{% elif report.status == "ACCEPTED" %}
+    <span style="color:#2ecc71;">{{ report.status }}</span>
+{% endif %}
+<br>
+
+{{ report.description }}<br>
+📍 {{ report.location }}<br><br>
+
+<!-- BUTTON -->
+<a href="/edit/{{ report.id }}/" class="btn edit">Edit</a> |
+<a href="/delete/{{ report.id }}/" class="btn delete">Delete</a> |
+
+{% if report.status == "REPORTED" %}
+    <a href="/process/{{ report.id }}/" class="btn process">Process</a>
+{% elif report.status == "PROCESS" %}
+    <a href="/accept/{{ report.id }}/" class="btn accept">Accept</a>
+{% elif report.status == "ACCEPTED" %}
+    <span style="color:#2ecc71;">✔ Selesai</span>
+{% endif %}
+
+</li>
+
+{% empty %}
+<p>Belum ada laporan</p>
+{% endfor %}
+
+</ul>
+
+</div>
+
 <div class="menu">
 <a href="/about/">About</a>
 <a href="/contacts/">Contacts</a>
 </div>
 
-</div>
-
 <footer>
 Axel City Smart Governance System
 </footer>
+
+</div>
 
 </body>
 </html>
