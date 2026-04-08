@@ -1,59 +1,46 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.views import View
+from django.shortcuts import get_object_or_404, redirect
 from .models import Report
-from .forms import ReportForm
 
-# READ
-def home(request):
-    reports = Report.objects.all()
-    return render(request, 'main_app/home.html', {'reports': reports})
+# LIST
+class ReportListView(ListView):
+    model = Report
+    template_name = 'main_app/home.html'
+    context_object_name = 'reports'
 
+# DETAIL
+class ReportDetailView(DetailView):
+    model = Report
+    template_name = 'main_app/report_detail.html'
 
 # CREATE
-def add_report(request):
-    if request.method == 'POST':
-        form = ReportForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    else:
-        form = ReportForm()
-
-    return render(request, 'main_app/add_report.html', {'form': form})
-
+class ReportCreateView(CreateView):
+    model = Report
+    fields = ['title', 'category', 'description', 'location']
+    template_name = 'main_app/add_report.html'
+    success_url = reverse_lazy('report_list')
 
 # UPDATE
-def edit_report(request, id):
-    report = get_object_or_404(Report, id=id)
-
-    if request.method == 'POST':
-        form = ReportForm(request.POST, instance=report)
-        if form.is_valid():
-            form.save()
-            return redirect('home')
-    else:
-        form = ReportForm(instance=report)
-
-    return render(request, 'main_app/edit_report.html', {'form': form})
-
+class ReportUpdateView(UpdateView):
+    model = Report
+    fields = ['title', 'category', 'description', 'location']
+    template_name = 'main_app/edit_report.html'
+    success_url = reverse_lazy('report_list')
 
 # DELETE
-def delete_report(request, id):
-    report = get_object_or_404(Report, id=id)
-    report.delete()
-    return redirect('home')
+class ReportDeleteView(DeleteView):
+    model = Report
+    template_name = 'main_app/delete_confirm.html'
+    success_url = reverse_lazy('report_list')
 
 
-# STATUS → PROCESS
-def process_report(request, id):
-    report = get_object_or_404(Report, id=id)
-    report.status = 'PROCESS'
-    report.save()
-    return redirect('home')
-
-
-# STATUS → ACCEPTED
-def accept_report(request, id):
-    report = get_object_or_404(Report, id=id)
-    report.status = 'ACCEPTED'
-    report.save()
-    return redirect('home')
+# WORKFLOW STATUS 
+class ReportUpdateStatusView(View):
+    def post(self, request, pk):
+        report = get_object_or_404(Report, pk=pk)
+        new_status = request.POST.get('status')
+        report.status = new_status
+        report.save()
+        return redirect('report_list')

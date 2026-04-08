@@ -122,6 +122,12 @@ efisien demi menciptakan lingkungan kota yang lebih baik.
 
 <b>{{ report.title }}</b> ({{ report.category }})<br>
 
+<!-- TAMBAHAN AUTO TANGGAL & JAM -->
+<small>
+🕒 {{ report.created_at|date:"d F Y H:i" }}
+</small>
+<br>
+
 <!-- STATUS WARNA -->
 <b>Status:</b>
 {% if report.status == "REPORTED" %}
