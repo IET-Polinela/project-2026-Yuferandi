@@ -18,7 +18,7 @@ body{
 }
 
 .container{
-    min-height:100vh; /* FIX BACKGROUND */
+    min-height:100vh;
     display:flex;
     flex-direction:column;
     justify-content:center;
@@ -111,7 +111,7 @@ efisien demi menciptakan lingkungan kota yang lebih baik.
 
 <h2>Daftar Laporan Kota</h2>
 
-<a href="/add/" style="display:inline-block; margin-bottom:15px; background:#e74c3c; padding:10px 20px; border-radius:5px; text-decoration:none; color:white;">
+<a href="{% url 'report_create' %}" style="display:inline-block; margin-bottom:15px; background:#e74c3c; padding:10px 20px; border-radius:5px; text-decoration:none; color:white;">
 + Tambah Laporan
 </a>
 
@@ -122,37 +122,45 @@ efisien demi menciptakan lingkungan kota yang lebih baik.
 
 <b>{{ report.title }}</b> ({{ report.category }})<br>
 
-<!-- TAMBAHAN AUTO TANGGAL & JAM -->
 <small>
-🕒 {{ report.created_at|date:"d F Y H:i" }}
+{{ report.created_at|date:"d F Y H:i" }}
 </small>
 <br>
 
-<!-- STATUS WARNA -->
 <b>Status:</b>
 {% if report.status == "REPORTED" %}
     <span style="color:#e74c3c;">{{ report.status }}</span>
-{% elif report.status == "PROCESS" %}
+{% elif report.status == "VERIFIED" %}
     <span style="color:#f1c40f;">{{ report.status }}</span>
-{% elif report.status == "ACCEPTED" %}
+{% elif report.status == "IN_PROGRESS" %}
+    <span style="color:#3498db;">{{ report.status }}</span>
+{% elif report.status == "RESOLVED" %}
     <span style="color:#2ecc71;">{{ report.status }}</span>
 {% endif %}
 <br>
 
 {{ report.description }}<br>
-📍 {{ report.location }}<br><br>
+{{ report.location }}<br><br>
 
-<!-- BUTTON -->
-<a href="/edit/{{ report.id }}/" class="btn edit">Edit</a> |
-<a href="/delete/{{ report.id }}/" class="btn delete">Delete</a> |
+<a href="{% url 'report_update' report.pk %}" class="btn edit">Edit</a> |
+<a href="{% url 'report_delete' report.pk %}" class="btn delete">Delete</a> |
 
-{% if report.status == "REPORTED" %}
-    <a href="/process/{{ report.id }}/" class="btn process">Process</a>
-{% elif report.status == "PROCESS" %}
-    <a href="/accept/{{ report.id }}/" class="btn accept">Accept</a>
-{% elif report.status == "ACCEPTED" %}
-    <span style="color:#2ecc71;">✔ Selesai</span>
-{% endif %}
+<form action="{% url 'update_status' report.pk %}" method="post" style="display:inline;">
+    {% csrf_token %}
+
+    {% if report.status == "REPORTED" %}
+        <button name="status" value="VERIFIED" class="btn process">Verify</button>
+
+    {% elif report.status == "VERIFIED" %}
+        <button name="status" value="IN_PROGRESS" class="btn process">Process</button>
+
+    {% elif report.status == "IN_PROGRESS" %}
+        <button name="status" value="RESOLVED" class="btn accept">Resolve</button>
+
+    {% elif report.status == "RESOLVED" %}
+        <span>Selesai</span>
+    {% endif %}
+</form>
 
 </li>
 
