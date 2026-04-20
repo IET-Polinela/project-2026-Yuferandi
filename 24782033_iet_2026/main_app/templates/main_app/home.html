@@ -1,187 +1,186 @@
+{% extends 'main_app/base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-<title>Axel City Report</title>
+
+{% block title %}Home{% endblock %}
+
+{% block breadcrumb %}
+<nav>
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active">Home</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
 
 <style>
-body{
-    margin:0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: 
-        linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.7)),
-        url("{% static 'images/axel.png' %}");
+body {
+    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
+                url("{% static 'images/axel.png' %}");
     background-size: cover;
     background-position: center;
-    background-repeat: no-repeat;
-    color:white;
+    background-attachment: fixed;
 }
 
-.container{
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    padding:20px;
+.card {
+    background: transparent !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
 }
 
-h1{
-    font-size:60px;
-    margin-bottom:10px;
-    text-shadow:0px 0px 10px rgba(0,0,0,0.5);
-}
-
-.subtitle{
-    font-size:22px;
-    margin-bottom:30px;
-}
-
-.box{
-    background: rgba(0,0,0,0.6);
-    padding:30px 40px;
-    border-radius:10px;
-    max-width:700px;
-    width:100%;
-    line-height:1.6;
-    margin-bottom:30px;
-    box-shadow:0px 0px 15px rgba(0,0,0,0.5);
-}
-
-.menu a{
-    text-decoration:none;
-    color:white;
-    background:#2ecc71;
-    padding:12px 25px;
-    margin:10px;
-    border-radius:6px;
-    font-size:16px;
-    transition:0.3s;
-}
-
-.menu a:hover{
-    background:#27ae60;
-    transform:scale(1.1);
-}
-
-.btn{
-    padding:5px 10px;
-    border-radius:5px;
-    text-decoration:none;
-    font-size:14px;
-}
-
-.edit{ color:#f1c40f; }
-.delete{ color:#e74c3c; }
-.process{ color:#3498db; }
-.accept{ color:#2ecc71; }
-
-footer{
-    margin-top:20px;
-    font-size:14px;
+.main-box {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: none;
 }
 </style>
-</head>
 
-<body>
+<div class="main-box">
 
-<div class="container">
-
-<h1>Axel City Report</h1>
-<p class="subtitle">Smart City Issue Reporting System</p>
-
-<div class="box">
-<p>
-Axel City adalah kota pemula bagi para adventurer yang penuh dengan kehidupan,
-aktivitas, dan berbagai fasilitas kota. Seiring berkembangnya kota ini,
-muncul berbagai permasalahan seperti jalan rusak, lampu jalan mati,
-sampah menumpuk, atau fasilitas umum yang memerlukan perbaikan.
-</p>
-
-<p>
-Axel City Report hadir sebagai platform digital yang memungkinkan warga
-untuk melaporkan berbagai permasalahan kota secara cepat dan terstruktur,
-sehingga pihak pengelola kota dapat menindaklanjuti laporan dengan lebih
-efisien demi menciptakan lingkungan kota yang lebih baik.
-</p>
+<!-- HERO -->
+<div class="text-center mb-5">
+    <h1 class="fw-bold">Axel City Report</h1>
+    <p class="text-muted">Smart City Issue Reporting System</p>
 </div>
 
-<div class="box">
+<!-- DESKRIPSI -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <p>
+        Axel City adalah kota pemula bagi para adventurer yang penuh dengan kehidupan,
+        aktivitas, dan berbagai fasilitas kota. Seiring berkembangnya kota ini,
+        muncul berbagai permasalahan seperti jalan rusak, lampu jalan mati,
+        sampah menumpuk, atau fasilitas umum yang memerlukan perbaikan.
+        </p>
 
-<h2>Daftar Laporan Kota</h2>
+        <p>
+        Axel City Report hadir sebagai platform digital yang memungkinkan warga
+        untuk melaporkan berbagai permasalahan kota secara cepat dan terstruktur,
+        sehingga pihak pengelola kota dapat menindaklanjuti laporan dengan lebih
+        efisien demi menciptakan lingkungan kota yang lebih baik.
+        </p>
+    </div>
+</div>
 
-<a href="{% url 'report_create' %}" style="display:inline-block; margin-bottom:15px; background:#e74c3c; padding:10px 20px; border-radius:5px; text-decoration:none; color:white;">
-+ Tambah Laporan
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Daftar Laporan Kota</h3>
+
+    <a href="{% url 'report_create' %}" class="btn btn-primary">
+        + Tambah Laporan
+    </a>
+</div>
+
+{% if reports %}
+
+<!-- TABLE -->
+<div class="table-responsive">
+<table class="table table-bordered table-striped align-middle">
+
+<thead class="table-dark">
+<tr>
+<th>Judul</th>
+<th>Kategori</th>
+<th>Lokasi</th>
+<th>Status</th>
+<th>Aksi</th>
+</tr>
+</thead>
+
+<tbody>
+{% for report in reports %}
+<tr>
+
+<td>
+    <strong>{{ report.title }}</strong><br>
+    <small class="text-muted">{{ report.created_at|date:"d M Y H:i" }}</small>
+</td>
+
+<td>{{ report.category }}</td>
+<td>{{ report.location }}</td>
+
+<!-- STATUS -->
+<td>
+{% if report.status == "REPORTED" %}
+<span class="badge bg-danger">Reported</span>
+{% elif report.status == "VERIFIED" %}
+<span class="badge bg-warning text-dark">Verified</span>
+{% elif report.status == "IN_PROGRESS" %}
+<span class="badge bg-info text-dark">In Progress</span>
+{% elif report.status == "RESOLVED" %}
+<span class="badge bg-success">Resolved</span>
+{% endif %}
+</td>
+
+<!-- ACTION -->
+<td>
+
+<a href="{% url 'report_update' report.pk %}" 
+   class="btn btn-sm btn-warning">
+   Edit
 </a>
 
-<ul style="list-style:none; padding:0;">
+<a href="{% url 'report_delete' report.pk %}" 
+   class="btn btn-sm btn-danger"
+   onclick="return confirm('Yakin ingin menghapus laporan ini?')">
+   Delete
+</a>
 
-{% for report in reports %}
-<li style="margin-bottom:15px; padding:15px; background:rgba(255,255,255,0.1); border-radius:8px;">
+<form action="{% url 'update_status' report.pk %}" method="post" class="d-inline">
+{% csrf_token %}
 
-<b>{{ report.title }}</b> ({{ report.category }})<br>
-
-<small>
-{{ report.created_at|date:"d F Y H:i" }}
-</small>
-<br>
-
-<b>Status:</b>
 {% if report.status == "REPORTED" %}
-    <span style="color:#e74c3c;">{{ report.status }}</span>
+<button name="status" value="VERIFIED" 
+class="btn btn-sm btn-primary"
+onclick="return confirm('Ubah status ke VERIFIED?')">
+Verify
+</button>
+
 {% elif report.status == "VERIFIED" %}
-    <span style="color:#f1c40f;">{{ report.status }}</span>
+<button name="status" value="IN_PROGRESS" 
+class="btn btn-sm btn-primary"
+onclick="return confirm('Ubah status ke IN PROGRESS?')">
+Process
+</button>
+
 {% elif report.status == "IN_PROGRESS" %}
-    <span style="color:#3498db;">{{ report.status }}</span>
+<button name="status" value="RESOLVED" 
+class="btn btn-sm btn-success"
+onclick="return confirm('Selesaikan laporan ini?')">
+Resolve
+</button>
+
 {% elif report.status == "RESOLVED" %}
-    <span style="color:#2ecc71;">{{ report.status }}</span>
+<span class="badge bg-success">Selesai</span>
 {% endif %}
-<br>
 
-{{ report.description }}<br>
-{{ report.location }}<br><br>
-
-<a href="{% url 'report_update' report.pk %}" class="btn edit">Edit</a> |
-<a href="{% url 'report_delete' report.pk %}" class="btn delete">Delete</a> |
-
-<form action="{% url 'update_status' report.pk %}" method="post" style="display:inline;">
-    {% csrf_token %}
-
-    {% if report.status == "REPORTED" %}
-        <button name="status" value="VERIFIED" class="btn process">Verify</button>
-
-    {% elif report.status == "VERIFIED" %}
-        <button name="status" value="IN_PROGRESS" class="btn process">Process</button>
-
-    {% elif report.status == "IN_PROGRESS" %}
-        <button name="status" value="RESOLVED" class="btn accept">Resolve</button>
-
-    {% elif report.status == "RESOLVED" %}
-        <span>Selesai</span>
-    {% endif %}
 </form>
 
-</li>
+</td>
 
-{% empty %}
-<p>Belum ada laporan</p>
+</tr>
 {% endfor %}
+</tbody>
 
-</ul>
+</table>
+</div>
+
+{% else %}
+
+<!-- EMPTY STATE -->
+<div class="text-center mt-5">
+    <h4 class="mb-3">Belum ada laporan</h4>
+    <a href="{% url 'report_create' %}" class="btn btn-primary">
+        Tambah Laporan
+    </a>
+</div>
+
+{% endif %}
 
 </div>
 
-<div class="menu">
-<a href="/about/">About</a>
-<a href="/contacts/">Contacts</a>
-</div>
-
-<footer>
-Axel City Smart Governance System
-</footer>
-
-</div>
-
-</body>
-</html>
+{% endblock %}

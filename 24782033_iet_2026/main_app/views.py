@@ -1,33 +1,31 @@
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.shortcuts import redirect, get_object_or_404
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django.urls import reverse_lazy
-from django.views import View
-from django.shortcuts import get_object_or_404, redirect
 from .models import Report
 
+
 # LIST
-class ReportListView(ListView):
+class HomeView(ListView):
     model = Report
     template_name = 'main_app/home.html'
     context_object_name = 'reports'
 
-# DETAIL
-class ReportDetailView(DetailView):
-    model = Report
-    template_name = 'main_app/report_detail.html'
 
 # CREATE
 class ReportCreateView(CreateView):
     model = Report
-    fields = ['title', 'category', 'description', 'location']
-    template_name = 'main_app/add_report.html'
+    fields = ['title', 'category', 'location', 'description']
+    template_name = 'main_app/report_form.html'
     success_url = reverse_lazy('report_list')
+
 
 # UPDATE
 class ReportUpdateView(UpdateView):
     model = Report
-    fields = ['title', 'category', 'description', 'location']
-    template_name = 'main_app/edit_report.html'
+    fields = ['title', 'category', 'location', 'description']
+    template_name = 'main_app/report_form.html'
     success_url = reverse_lazy('report_list')
+
 
 # DELETE
 class ReportDeleteView(DeleteView):
@@ -36,11 +34,18 @@ class ReportDeleteView(DeleteView):
     success_url = reverse_lazy('report_list')
 
 
-# WORKFLOW STATUS 
-class ReportUpdateStatusView(View):
-    def post(self, request, pk):
-        report = get_object_or_404(Report, pk=pk)
-        new_status = request.POST.get('status')
-        report.status = new_status
+# DETAIL
+class ReportDetailView(DetailView):
+    model = Report
+    template_name = 'main_app/report_detail.html'
+
+
+# UPDATE STATUS
+def update_status(request, pk):
+    report = get_object_or_404(Report, pk=pk)
+
+    if request.method == 'POST':
+        report.status = request.POST.get('status')
         report.save()
-        return redirect('report_list')
+
+    return redirect('report_list')
