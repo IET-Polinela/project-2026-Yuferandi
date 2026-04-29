@@ -1,0 +1,22 @@
+{% extends 'main_app/base.html' %}
+
+{% block title %}Report Detail{% endblock %}
+
+{% block content %}
+
+<h3>{{ object.title }}</h3>
+
+<hr>
+
+<p><strong>Category:</strong> {{ object.category }}</p>
+<p><strong>Location:</strong> {{ object.location }}</p>
+<p><strong>Description:</strong></p>
+<p>{{ object.description }}</p>
+
+<p><strong>Status:</strong> {{ object.status }}</p>
+
+<a href="{% url 'report_list' %}" class="btn btn-secondary mt-3">
+    Back
+</a>
+
+{% endblock %}

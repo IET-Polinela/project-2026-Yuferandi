@@ -1,0 +1,46 @@
+{% extends 'main_app/base.html' %}
+
+{% block title %}Report List{% endblock %}
+
+{% block content %}
+
+<h3 class="mb-3">Daftar Reports</h3>
+
+<a href="{% url 'report_create' %}" class="btn btn-primary mb-3">
+    + Tambah Report
+</a>
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for report in reports %}
+        <tr>
+            <td>{{ report.title }}</td>
+            <td>{{ report.category }}</td>
+            <td>{{ report.location }}</td>
+            <td>{{ report.status }}</td>
+
+            <td>
+                <a href="{% url 'report_detail' report.id %}" class="btn btn-sm btn-info">Detail</a>
+                <a href="{% url 'report_update' report.id %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'report_delete' report.id %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center">Belum ada data report</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
