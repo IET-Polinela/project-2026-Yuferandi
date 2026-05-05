@@ -10,9 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
     <style>
-        /* =========================
-           BACKGROUND & GLOBAL
-        ========================= */
+        /* Background & Global */
         body {
             background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
                         url("{% static 'images/axel.png' %}");
@@ -22,9 +20,7 @@
             min-height: 100vh;
         }
 
-        /* =========================
-           CONTENT BOX
-        ========================= */
+        /* Kotak konten utama */
         .content-box {
             background: rgba(255, 255, 255, 0.92);
             padding: 25px;
@@ -38,9 +34,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* =========================
-           SMOOTH LOADER
-        ========================= */
+        /* Overlay loader pas transisi halaman */
         #loader {
             position: fixed;
             inset: 0;
@@ -71,9 +65,7 @@
             100% { transform: rotate(360deg) scale(1); }
         }
 
-        /* =========================
-           NAVBAR CUSTOM
-        ========================= */
+        /* Navbar custom blur */
         .navbar {
             backdrop-filter: blur(12px);
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -83,6 +75,7 @@
 
 <body>
 
+<!-- Elemen Loader -->
 <div id="loader">
     <img src="{% static 'images/logo.jpg' %}" class="logo-loader" alt="Loading...">
 </div>
@@ -101,6 +94,14 @@
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item"><a class="nav-link px-3" href="/">Home</a></li>
                 <li class="nav-item"><a class="nav-link px-3" href="/reports/">Reports</a></li>
+                
+                <!-- Menu Dashboard Lab 7 -->
+                <li class="nav-item">
+                    <a class="nav-link px-3 fw-bold text-info" href="{% url 'dashboard' %}">
+                        <i class="bi bi-bar-chart-line-fill"></i> Dashboard
+                    </a>
+                </li>
+
                 <li class="nav-item"><a class="nav-link px-3" href="/about/">About</a></li>
                 <li class="nav-item"><a class="nav-link px-3" href="/contacts/">Contact</a></li>
 
@@ -135,10 +136,12 @@
     </div>
 </nav>
 
+<!-- Container Pesan/Flash Messages -->
 <div class="container mt-4">
     {% if messages %}
         {% for message in messages %}
             
+            <!-- Alert khusus error -->
             {% if 'error' in message.tags or message.level_tag == 'error' %}
                 <div class="alert alert-dismissible fade show shadow-lg" role="alert" 
                      style="background-color: #dc3545 !important; color: #ffffff !important; border: 2px solid #842029; font-weight: 700; font-size: 1.15rem; letter-spacing: 0.5px;">
@@ -146,6 +149,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
                 </div>
             {% else %}
+                <!-- Alert sukses default -->
                 <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert" style="font-weight: bold;">
                     <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -156,6 +160,7 @@
     {% endif %}
 </div>
 
+<!-- Render isi konten tiap halaman -->
 <div class="container mt-4 mb-5">
     <div class="content-box">
         {% block content %}{% endblock %}
@@ -167,7 +172,7 @@
 <script>
     const loader = document.getElementById("loader");
 
-    // Hide loader after page finished loading
+    // Sembunyiin loader pas page kelar load
     window.addEventListener("load", function () {
         loader.classList.add("hide");
         setTimeout(() => {
@@ -175,12 +180,12 @@
         }, 400);
     });
 
-    // Show loader on link clicks
+    // Munculin loader pas klik link navigasi
     document.querySelectorAll("a").forEach(link => {
         link.addEventListener("click", function (e) {
             const href = this.getAttribute("href");
             
-            // Bypass for external links, anchors, and target blank
+            // Skip link luar, anchor, atau tab baru
             if (!href || href.startsWith("#") || href.startsWith("http") || this.target === "_blank") return;
 
             e.preventDefault();
@@ -193,7 +198,7 @@
         });
     });
 
-    // Show loader on Logout Submit
+    // Munculin loader pas submit logout
     const logoutForm = document.getElementById("logout-form");
     if(logoutForm) {
         logoutForm.addEventListener("submit", function() {

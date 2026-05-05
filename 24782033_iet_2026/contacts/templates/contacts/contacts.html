@@ -1,85 +1,48 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Contacts - Axel City Report</title>
+{% extends 'main_app/base.html' %}
 
-<style>
-body{
-    margin:0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: linear-gradient(#6dd5fa, #2980b9);
-    color:white;
-}
+{% block title %}Contacts - Axel City Report{% endblock %}
 
-.container{
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-}
+{% block content %}
+<div class="text-center py-4">
+    <!-- Judul utama -->
+    <h2 class="fw-bold mb-4">Hubungi Administrasi Axel City</h2>
+    
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Kotak informasi kontak -->
+            <div class="card border-0 shadow-sm bg-light mb-4">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <i class="bi bi-envelope-at-fill text-primary" style="font-size: 3rem;"></i>
+                        <h5 class="mt-2 fw-bold">Email Resmi</h5>
+                        <p class="text-muted">yuferyandi1002@gmail.com</p>
+                    </div>
 
-h1{
-    font-size:50px;
-    margin-bottom:30px;
-}
+                    <hr class="my-4">
 
-.contact-box{
-    background: rgba(0,0,0,0.3);
-    padding:30px 40px;
-    border-radius:10px;
-    margin-bottom:30px;
-}
+                    <div class="mb-2">
+                        <i class="bi bi-telephone-fill text-success" style="font-size: 3rem;"></i>
+                        <h5 class="mt-2 fw-bold">Layanan Telepon</h5>
+                        <p class="text-muted">081532718911</p>
+                    </div>
+                </div>
+            </div>
 
-p{
-    font-size:18px;
-}
-
-.menu a{
-    text-decoration:none;
-    color:white;
-    background:#2ecc71;
-    padding:10px 25px;
-    margin:10px;
-    border-radius:6px;
-}
-
-.menu a:hover{
-    background:#27ae60;
-    transform:scale(1.1);
-}
-
-footer{
-    position:absolute;
-    bottom:20px;
-    width:100%;
-    text-align:center;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<h1>Contact Axel City Administration</h1>
-
-<div class="contact-box">
-<p><strong>Email:</strong> yuferyandi1002@gmail.com</p>
-<p><strong>Telepon:</strong> 081532718911</p>
+            <!-- Tombol navigasi cepat -->
+            <div class="d-flex justify-content-center gap-3">
+                <a href="/" class="btn btn-outline-primary px-4 rounded-pill">
+                    <i class="bi bi-house-door"></i> Home
+                </a>
+                <a href="/about/" class="btn btn-outline-secondary px-4 rounded-pill">
+                    <i class="bi bi-info-circle"></i> About
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="menu">
-<a href="/">Home</a>
-<a href="/about/">About</a>
+<!-- Footer kecil khusus halaman contact -->
+<div class="text-center mt-5 text-muted small">
+    Axel City Smart Governance System
 </div>
-
-</div>
-
-<footer>
-Axel City Smart Governance System
-</footer>
-
-</body>
-</html>
+{% endblock %}

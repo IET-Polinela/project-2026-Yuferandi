@@ -7,6 +7,8 @@ from django.urls import reverse_lazy
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
+from django.http import JsonResponse
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -15,16 +17,12 @@ from .models import Report
 from .serializers import ReportSerializer
 
 
-# =========================
 # ROLE HELPER
-# =========================
 def is_admin(user):
     return user.is_authenticated and getattr(user, 'is_admin', False)
 
 
-# =========================
 # WEB VIEWS
-# =========================
 
 class HomeView(TemplateView):
     template_name = 'main_app/home.html'
@@ -89,7 +87,7 @@ class ReportDetailView(LoginRequiredMixin, DetailView):
 # UPDATE STATUS (ADMIN ONLY)
 def update_status(request, pk):
     if not is_admin(request.user):
-        messages.error(request, "❌ Akses ditolak! Hanya admin yang bisa update status.")
+        messages.error(request, "Akses ditolak! Hanya admin yang bisa update status.")
         return redirect('report_list')
 
     report = get_object_or_404(Report, pk=pk)
@@ -97,14 +95,12 @@ def update_status(request, pk):
     if request.method == 'POST':
         report.status = request.POST.get('status')
         report.save()
-        messages.success(request, "✅ Status berhasil diupdate!")
+        messages.success(request, "Status berhasil diupdate!")
 
     return redirect('report_list')
 
 
-# =========================
 # API
-# =========================
 
 @api_view(['GET', 'POST'])
 def api_reports(request):
@@ -151,3 +147,28 @@ def api_report_detail(request, pk):
     if request.method == 'DELETE':
         report.delete()
         return Response(status=204)
+
+
+# API UNTUK LIVE SEARCH (AJAX)
+def api_search_reports(request):
+    query = request.GET.get('q', '')
+    if query:
+        reports = Report.objects.filter(
+            Q(title__icontains=query) | 
+            Q(category__icontains=query) | 
+            Q(location__icontains=query)
+        ).order_by('-created_at')[:20]
+    else:
+        reports = Report.objects.all().order_by('-created_at')[:20]
+    
+    data = []
+    for r in reports:
+        data.append({
+            'id': r.id,
+            'title': r.title,
+            'category': r.category,
+            'location': r.location,
+            'status': r.status,
+            'is_admin': is_admin(request.user) 
+        })
+    return JsonResponse({'results': data})

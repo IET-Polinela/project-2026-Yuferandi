@@ -9,7 +9,8 @@ from .views import (
     update_status,
 
     api_reports,
-    api_report_detail
+    api_report_detail,
+    api_search_reports
 )
 
 urlpatterns = [
@@ -23,8 +24,12 @@ urlpatterns = [
     path('reports/<int:pk>/delete/', ReportDeleteView.as_view(), name='report_delete'),
     path('reports/<int:pk>/', ReportDetailView.as_view(), name='report_detail'),
     path('reports/<int:pk>/status/', update_status, name='update_status'),
-
+    
     # API
     path('api/reports/', api_reports),
     path('api/reports/<int:pk>/', api_report_detail),
+
+    # API BARU
+    path('api/search/', api_search_reports, name='api_search_reports'),
+    path('api/detail/<int:pk>/', api_report_detail, name='api_detail_modal'),
 ]

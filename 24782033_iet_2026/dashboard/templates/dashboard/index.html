@@ -1,0 +1,137 @@
+{% extends 'main_app/base.html' %}
+
+{% block title %}Dashboard Statistik{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 fw-bold text-primary">📊 Dashboard Monitoring Smart City</h2>
+    
+    <!-- Row buat grafik -->
+    <div class="row mb-4">
+        <!-- Grafik Status -->
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-center fw-bold">Distribusi Status Laporan</h5>
+                    <hr>
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Grafik Kategori -->
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-center fw-bold">Top Kategori Laporan</h5>
+                    <hr>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row buat tabel ringkasan -->
+    <div class="row">
+        <!-- 5 Laporan Terbaru -->
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0 fw-bold">5 Laporan Terbaru (Reported)</h6>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <tbody id="tableReported">
+                            <!-- isi data via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5 Laporan Selesai -->
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0 fw-bold">5 Laporan Selesai (Resolved)</h6>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <tbody id="tableResolved">
+                            <!-- isi data via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load Chart.js dari CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ambil data dari API dashboard yang udah kita bikin di backend
+    fetch('/dashboard/api/data/')
+        .then(res => res.json())
+        .then(data => {
+            
+            // 1. Render Chart Status (Doughnut)
+            const statusLabels = data.status_data.map(i => i.status);
+            const statusCounts = data.status_data.map(i => i.total);
+            
+            new Chart(document.getElementById('statusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusCounts,
+                        backgroundColor: ['#6c757d', '#0dcaf0', '#ffc107', '#198754'],
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true }
+            });
+
+            // 2. Render Chart Kategori (Bar)
+            const catLabels = data.category_data.map(i => i.category);
+            const catCounts = data.category_data.map(i => i.total);
+
+            new Chart(document.getElementById('categoryChart'), {
+                type: 'bar',
+                data: {
+                    labels: catLabels,
+                    datasets: [{
+                        label: 'Jumlah Laporan',
+                        data: catCounts,
+                        backgroundColor: '#0d6efd',
+                        borderRadius: 5
+                    }]
+                }
+            });
+
+            // 3. Isi Tabel Terbaru
+            const tableReported = document.getElementById('tableReported');
+            if(data.latest_reported.length > 0) {
+                data.latest_reported.forEach(item => {
+                    tableReported.innerHTML += `<tr><td class="p-3">${item.title}</td></tr>`;
+                });
+            } else {
+                tableReported.innerHTML = '<tr><td class="p-3 text-muted">Kosong.</td></tr>';
+            }
+
+            // 4. Isi Tabel Selesai
+            const tableResolved = document.getElementById('tableResolved');
+            if(data.latest_resolved.length > 0) {
+                data.latest_resolved.forEach(item => {
+                    tableResolved.innerHTML += `<tr><td class="p-3 text-success">✅ ${item.title}</td></tr>`;
+                });
+            } else {
+                tableResolved.innerHTML = '<tr><td class="p-3 text-muted">Belum ada laporan selesai.</td></tr>';
+            }
+        })
+        .catch(err => console.error('Gagal narik data dashboard:', err));
+});
+</script>
+{% endblock %}

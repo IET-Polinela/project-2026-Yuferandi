@@ -1,100 +1,65 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>About - Axel City Report</title>
+{% extends 'main_app/base.html' %}
 
-<style>
-body{
-    margin:0;
-    font-family: Arial, Helvetica, sans-serif;
-    background: linear-gradient(#6dd5fa, #2980b9);
-    color:white;
-}
+{% block title %}About - Axel City Report{% endblock %}
 
-.container{
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    padding:20px;
-}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center text-center">
+        <div class="col-lg-9">
+            <!-- Icon dan Judul -->
+            <div class="mb-4">
+                <i class="bi bi-info-circle-fill text-primary" style="font-size: 3.5rem;"></i>
+                <h2 class="fw-bold mt-2">Tentang Axel City Report</h2>
+            </div>
 
-h1{
-    font-size:50px;
-    margin-bottom:30px;
-}
+            <!-- Box Konten -->
+            <div class="card border-0 shadow-sm bg-light mb-4">
+                <div class="card-body p-4 p-md-5">
+                    <p class="lead text-dark mb-4">
+                        <strong>Axel City Report</strong> adalah platform digital yang dirancang khusus untuk mempercepat komunikasi antara warga dan pemerintah kota dalam menangani masalah infrastruktur serta fasilitas umum.
+                    </p>
 
-.about-box{
-    background: rgba(0,0,0,0.3);
-    padding:30px 40px;
-    border-radius:10px;
-    max-width:700px;
-    line-height:1.6;
-    margin-bottom:30px;
-}
+                    <div class="row text-start g-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-megaphone-fill text-primary me-3 fs-4"></i>
+                                <div>
+                                    <h6 class="fw-bold">Pelaporan Mudah</h6>
+                                    <p class="small text-muted">Laporkan jalan rusak, lampu mati, hingga penumpukan sampah hanya dalam beberapa klik.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-eye-fill text-success me-3 fs-4"></i>
+                                <div>
+                                    <h6 class="fw-bold">Transparansi Data</h6>
+                                    <p class="small text-muted">Sistem kami memastikan setiap laporan terdokumentasi dan dapat dipantau perkembangannya.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-.menu a{
-    text-decoration:none;
-    color:white;
-    background:#2ecc71;
-    padding:10px 25px;
-    margin:10px;
-    border-radius:6px;
-}
+                    <p class="mt-4 text-secondary italic">
+                        "Mewujudkan Axel City sebagai kota yang responsif, aman, dan nyaman melalui sistem pemerintahan digital yang cerdas."
+                    </p>
+                </div>
+            </div>
 
-.menu a:hover{
-    background:#27ae60;
-    transform:scale(1.1);
-}
-
-footer{
-    position:absolute;
-    bottom:20px;
-    width:100%;
-    text-align:center;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<h1>About Axel City Report</h1>
-
-<div class="about-box">
-
-<p>
-Axel City Report adalah aplikasi berbasis web yang dirancang untuk membantu
-warga melaporkan berbagai permasalahan di lingkungan kota.
-</p>
-
-<p>
-Melalui sistem ini, warga dapat melaporkan masalah seperti jalan rusak,
-lampu jalan mati, sampah menumpuk, banjir lokal, atau fasilitas umum yang
-bermasalah sehingga dapat segera ditindaklanjuti oleh pihak pengelola kota.
-</p>
-
-<p>
-Dengan adanya sistem pelaporan yang terstruktur dan transparan,
-Axel City dapat berkembang menjadi kota yang lebih responsif,
-aman, dan nyaman bagi seluruh warga.
-</p>
-
+            <!-- Navigasi Bawah -->
+            <div class="d-flex justify-content-center gap-3">
+                <a href="/" class="btn btn-outline-primary px-4 rounded-pill">
+                    <i class="bi bi-house-door"></i> Home
+                </a>
+                <a href="/contacts/" class="btn btn-outline-secondary px-4 rounded-pill">
+                    <i class="bi bi-telephone"></i> Contacts
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="menu">
-<a href="/">Home</a>
-<a href="/contacts/">Contacts</a>
+<div class="text-center mt-5 text-muted small">
+    Axel City Smart Governance System &copy; 2026
 </div>
-
-</div>
-
-<footer>
-Axel City Smart Governance System
-</footer>
-
-</body>
-</html>
+{% endblock %}

@@ -3,15 +3,23 @@
 {% block title %}Report List{% endblock %}
 
 {% block content %}
-
 <h3 class="mb-3">Daftar Reports</h3>
 
-<!-- TOMBOL TAMBAH HANYA MUNCUL UNTUK ADMIN -->
-{% if user.is_authenticated and user.is_admin %}
-<a href="{% url 'report_create' %}" class="btn btn-primary mb-3">
-    + Tambah Report
-</a>
-{% endif %}
+<div class="d-flex justify-content-between mb-3">
+    <!-- Tombol buat laporan baru (admin only) -->
+    {% if user.is_authenticated and user.is_admin %}
+    <a href="{% url 'report_create' %}" class="btn btn-primary">
+        + Tambah Report
+    </a>
+    {% else %}
+    <div></div>
+    {% endif %}
+
+    <!-- Search box -->
+    <div class="w-50">
+        <input type="text" id="searchInput" class="form-control" placeholder="🔍 Ketik judul, kategori, atau lokasi...">
+    </div>
+</div>
 
 <table class="table table-bordered table-hover bg-white shadow-sm">
     <thead class="table-light">
@@ -23,15 +31,13 @@
             <th>Aksi</th>
         </tr>
     </thead>
-
-    <tbody>
+    <!-- id target buat diisi data via JS -->
+    <tbody id="reportTableBody">
         {% for report in reports %}
         <tr>
             <td>{{ report.title }}</td>
             <td>{{ report.category }}</td>
             <td>{{ report.location }}</td>
-            
-            <!-- BAGIAN STATUS DENGAN BADGE BOOTSTRAP       -->
             <td class="text-center align-middle">
                 {% if report.status == 'REPORTED' %}
                     <span class="badge bg-secondary">Reported</span>
@@ -45,12 +51,10 @@
                     <span class="badge bg-dark">{{ report.status }}</span>
                 {% endif %}
             </td>
-
             <td>
-                <!-- Semua user (Citizen/Admin) bisa lihat Detail -->
-                <a href="{% url 'report_detail' report.id %}" class="btn btn-sm btn-info">Detail</a>
+                <!-- Simpan ID di data-id buat keperluan Fetch Detail -->
+                <button class="btn btn-sm btn-info btn-detail" data-id="{{ report.id }}" data-bs-toggle="modal" data-bs-target="#detailModal">Detail Modal</button>
                 
-                <!-- TOMBOL EDIT & DELETE HANYA MUNCUL UNTUK ADMIN -->
                 {% if user.is_authenticated and user.is_admin %}
                     <a href="{% url 'report_update' report.id %}" class="btn btn-sm btn-warning">Edit</a>
                     <a href="{% url 'report_delete' report.id %}" class="btn btn-sm btn-danger">Delete</a>
@@ -59,10 +63,150 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan="5" class="text-center text-muted py-4">Belum ada data report.</td>
+            <td colspan="5" class="text-center text-muted py-4">Belum ada data laporan.</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
+<!-- Pop-up Detail Laporan -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="detailModalLabel">Detail Laporan</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Efek loading pas narik data -->
+        <div id="modalLoading" class="text-center py-3">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Tunggu bentar, lagi ngambil data...</p>
+        </div>
+        
+        <!-- Konten detailnya -->
+        <div id="modalContent" class="d-none">
+            <h4 id="modalTitle" class="mb-3"></h4>
+            <p><strong>Kategori:</strong> <span id="modalCategory"></span></p>
+            <p><strong>Lokasi:</strong> <span id="modalLocation"></span></p>
+            <p><strong>Tanggal:</strong> <span id="modalDate"></span></p>
+            <p><strong>Status:</strong> <span id="modalStatus" class="badge"></span></p>
+            <hr>
+            <p><strong>Deskripsi:</strong></p>
+            <p id="modalDescription" class="bg-light p-2 rounded border"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <!-- Tombol "Kelola Status" khusus Admin muncul di sini -->
+        {% if user.is_authenticated and user.is_admin %}
+            <a href="#" id="btnFullDetail" class="btn btn-warning fw-bold">⚙️ Kelola Status</a>
+        {% endif %}
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('reportTableBody');
+    let debounceTimer;
+
+    // Helper nentuin warna badge status
+    function getStatusBadge(status) {
+        if(status === 'REPORTED') return '<span class="badge bg-secondary">Reported</span>';
+        if(status === 'VERIFIED') return '<span class="badge bg-info text-dark">Verified</span>';
+        if(status === 'IN_PROGRESS') return '<span class="badge bg-warning text-dark">In Progress</span>';
+        if(status === 'RESOLVED') return '<span class="badge bg-success">Resolved</span>';
+        return `<span class="badge bg-dark">${status}</span>`;
+    }
+
+    // Fitur Cari (Live Search)
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        const query = searchInput.value;
+        
+        // Kasih jeda ketik 300ms biar ga beratin server
+        debounceTimer = setTimeout(() => {
+            fetch(`/api/search/?q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    tableBody.innerHTML = ''; 
+                    
+                    if(data.results.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4">Laporan nggak ketemu.</td></tr>';
+                        return;
+                    }
+
+                    // Loop buat nampilin hasil search
+                    data.results.forEach(report => {
+                        let actionButtons = `<button class="btn btn-sm btn-info btn-detail" data-id="${report.id}" data-bs-toggle="modal" data-bs-target="#detailModal">Detail Modal</button>`;
+                        
+                        // Kalo dia admin, tambahin tombol edit delete
+                        if(report.is_admin) {
+                            actionButtons += `
+                                <a href="/reports/${report.id}/update/" class="btn btn-sm btn-warning">Edit</a>
+                                <a href="/reports/${report.id}/delete/" class="btn btn-sm btn-danger">Delete</a>
+                            `;
+                        }
+
+                        const row = `
+                            <tr>
+                                <td>${report.title}</td>
+                                <td>${report.category}</td>
+                                <td>${report.location}</td>
+                                <td class="text-center align-middle">${getStatusBadge(report.status)}</td>
+                                <td>${actionButtons}</td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+                });
+        }, 300); 
+    });
+
+    // Fitur Buka Detail via Modal (Event Delegation)
+    tableBody.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-detail')) {
+            const reportId = e.target.getAttribute('data-id');
+            
+            // Set loading state
+            document.getElementById('modalLoading').classList.remove('d-none');
+            document.getElementById('modalContent').classList.add('d-none');
+
+            // Ambil data detail via API
+            fetch(`/api/detail/${reportId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update teks modal
+                    document.getElementById('modalTitle').textContent = data.title;
+                    document.getElementById('modalCategory').textContent = data.category;
+                    document.getElementById('modalLocation').textContent = data.location;
+                    document.getElementById('modalDate').textContent = data.created_at;
+                    document.getElementById('modalDescription').textContent = data.description;
+                    
+                    // Update warna badge status
+                    const statusSpan = document.getElementById('modalStatus');
+                    statusSpan.outerHTML = getStatusBadge(data.status); 
+                    document.querySelector('.modal-body .badge').id = 'modalStatus';
+
+                    // Update link tombol Kelola Status buat Admin
+                    const btnFullDetail = document.getElementById('btnFullDetail');
+                    if (btnFullDetail) {
+                        btnFullDetail.href = `/reports/${reportId}/`;
+                    }
+
+                    // Tampilin konten, hide loading
+                    document.getElementById('modalLoading').classList.add('d-none');
+                    document.getElementById('modalContent').classList.remove('d-none');
+                })
+                .catch(err => {
+                    document.getElementById('modalLoading').innerHTML = '<p class="text-danger">Aduh, gagal ambil data.</p>';
+                });
+        }
+    });
+});
+</script>
 {% endblock %}
