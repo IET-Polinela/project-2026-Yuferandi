@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views import (
     HomeView,
     ReportListView,
@@ -25,11 +25,14 @@ urlpatterns = [
     path('reports/<int:pk>/', ReportDetailView.as_view(), name='report_detail'),
     path('reports/<int:pk>/status/', update_status, name='update_status'),
     
-    # API
+    # API LAMA
     path('api/reports/', api_reports),
     path('api/reports/<int:pk>/', api_report_detail),
 
     # API BARU
     path('api/search/', api_search_reports, name='api_search_reports'),
     path('api/detail/<int:pk>/', api_report_detail, name='api_detail_modal'),
+    
+    # Menghubungkan ViewSet baru
+    path('api/', include('main_app.api_urls')),
 ]
