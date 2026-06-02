@@ -20,14 +20,13 @@ class ReportViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         
-        # Admin bisa melihat seluruh laporan
+        # Sesuai aturan layar: Admin melihat semua laporan kecuali DRAFT
         if user.is_staff:
-            return Report.objects.all()
+            return Report.objects.exclude(status='DRAFT')
         
-        # Citizen melihat SEMUA laporan (kecuali DRAFT), ditambah DRAFT miliknya sendiri
+        # Sesuai aturan layar: Citizen melihat laporan publik (selain DRAFT) + DRAFT miliknya sendiri
         return Report.objects.filter(
-            Q(status__in=['REPORTED', 'VERIFIED', 'IN_PROGRESS', 'RESOLVED']) | 
-            Q(reporter=user)
+            ~Q(status='DRAFT') | Q(reporter=user, status='DRAFT')
         )
 
     def perform_update(self, serializer):

@@ -45,11 +45,13 @@ INSTALLED_APPS = [
     'about',
     'contacts',
     'dashboard',
+    'corsheaders',
 
     'usermanagement_24782033',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # Tetap di paling atas untuk mengizinkan CORS
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -148,3 +150,5 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
+
+CORS_ALLOW_ALL_ORIGINS = True
