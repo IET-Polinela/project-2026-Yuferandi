@@ -5,9 +5,7 @@ let totalPages = 1;
 let editingReportId = null; 
 let reportModalInstance = null;
 
-// ==========================================
-// 1. Fetching API Terpaginasi
-// ==========================================
+// Fetch data laporan terpaginasi dari API
 async function loadDashboardData(tab = currentTab, page = currentPage) {
     currentTab = tab;
     currentPage = page;
@@ -36,32 +34,36 @@ async function loadDashboardData(tab = currentTab, page = currentPage) {
     }
 }
 
-// ==========================================
-// 2. Bypass Kalkulasi Rekap di Sidebar
-// ==========================================
+// Menghitung data rekapitulasi 5 status pilihan pada Sidebar
 async function loadSummaryStats() {
     const response = await requestAPI('/api/report/?tab=my_reports&page_size=1000', 'GET');
     
     if (response && response.status === 200) {
         const allMyReports = response.data.results || [];
         
+        // Pemisahan filter array untuk kelima status dasar
         const totalDraft = allMyReports.filter(r => r.status === 'DRAFT').length;
-        const totalProses = allMyReports.filter(r => r.status === 'IN_PROGRESS' || r.status === 'VERIFIED' || r.status === 'REPORTED').length;
-        const totalSelesai = allMyReports.filter(r => r.status === 'RESOLVED').length;
+        const totalReported = allMyReports.filter(r => r.status === 'REPORTED').length;
+        const totalVerified = allMyReports.filter(r => r.status === 'VERIFIED').length;
+        const totalInProgress = allMyReports.filter(r => r.status === 'IN_PROGRESS').length;
+        const totalResolved = allMyReports.filter(r => r.status === 'RESOLVED').length;
 
+        // Injeksi nilai teks ke DOM elemen masing-masing id status
         const statDraft = document.getElementById('statDraft');
-        const statProses = document.getElementById('statProses');
-        const statSelesai = document.getElementById('statSelesai');
+        const statReported = document.getElementById('statReported');
+        const statVerified = document.getElementById('statVerified');
+        const statInProgress = document.getElementById('statInProgress');
+        const statResolved = document.getElementById('statResolved');
 
         if(statDraft) statDraft.innerText = totalDraft;
-        if(statProses) statProses.innerText = totalProses;
-        if(statSelesai) statSelesai.innerText = totalSelesai;
+        if(statReported) statReported.innerText = totalReported;
+        if(statVerified) statVerified.innerText = totalVerified;
+        if(statInProgress) statInProgress.innerText = totalInProgress;
+        if(statResolved) statResolved.innerText = totalResolved;
     }
 }
 
-// ==========================================
-// 3. Render List & Progress Bar
-// ==========================================
+// Render list komponen kartu data visual
 function renderList() {
     const listContainer = document.getElementById('listContainer');
     if (!listContainer) return;
@@ -135,22 +137,34 @@ function renderList() {
     listContainer.innerHTML = html;
 }
 
-// ==========================================
-// 4. Render Tombol Paginasi
-// ==========================================
+// Render Tombol Navigasi Teroptimasi (First Page, Last Page, dan Ellipses)
 function renderPagination() {
     const paginationContainer = document.getElementById('paginationContainer');
     if (!paginationContainer) return;
     
-    let html = `<nav><ul class="pagination justify-content-center">`;
+    let html = `<nav><ul class="pagination justify-content-center shadow-sm">`;
     
+    // Tombol Previous Bawaan
     html += `
         <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
             <button class="page-link" onclick="loadDashboardData('${currentTab}', ${currentPage - 1})">&laquo;</button>
         </li>
     `;
     
-    for (let i = 1; i <= totalPages; i++) {
+    // Definisi range nomor aktif di sekitar halaman saat ini (Sliding Window)
+    let startPage = Math.max(1, currentPage - 1);
+    let endPage = Math.min(totalPages, currentPage + 1);
+
+    // Kasus 1: Tampilkan Tombol Halaman Pertama (First Page) & Titik Titik Awal jika halaman jauh
+    if (startPage > 1) {
+        html += `<li class="page-item"><button class="page-link" onclick="loadDashboardData('${currentTab}', 1)">1</button></li>`;
+        if (startPage > 2) {
+            html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+    }
+    
+    // Kasus 2: Render Looping Nomor Range Halaman Tengah Aktif
+    for (let i = startPage; i <= endPage; i++) {
         html += `
             <li class="page-item ${currentPage === i ? 'active' : ''}">
                 <button class="page-link" onclick="loadDashboardData('${currentTab}', ${i})">${i}</button>
@@ -158,6 +172,15 @@ function renderPagination() {
         `;
     }
     
+    // Kasus 3: Tampilkan Titik Titik Akhir & Tombol Halaman Terakhir (Last Page)
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+        html += `<li class="page-item"><button class="page-link" onclick="loadDashboardData('${currentTab}', ${totalPages})">${totalPages}</button></li>`;
+    }
+    
+    // Tombol Next Bawaan
     html += `
         <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
             <button class="page-link" onclick="loadDashboardData('${currentTab}', ${currentPage + 1})">&raquo;</button>
@@ -168,9 +191,7 @@ function renderPagination() {
     paginationContainer.innerHTML = html;
 }
 
-// ==========================================
-// 5. Manajemen Modal & Submit API
-// ==========================================
+// Inisialisasi Modal Baru
 function openModalNewReport() {
     editingReportId = null; 
     document.getElementById('reportForm').reset();
@@ -178,6 +199,7 @@ function openModalNewReport() {
     reportModalInstance.show();
 }
 
+// Distribusi data ke form edit draft
 function editDraft(id) {
     const report = allReports.find(r => r.id === id);
     if (report) {
@@ -193,6 +215,7 @@ function editDraft(id) {
     }
 }
 
+// Submit transaksi data form ke backend
 async function submitReportData(statusTarget) {
     const payload = {
         title: document.getElementById('title').value,
@@ -229,9 +252,7 @@ async function submitReportData(statusTarget) {
     }
 }
 
-// ==========================================
-// 6. Inisialisasi
-// ==========================================
+// Lifecycle Listener
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof handleRouting === 'function') handleRouting();
 
