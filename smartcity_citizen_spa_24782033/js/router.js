@@ -15,29 +15,72 @@ const routes = {
         <div class="row g-4">
             <aside class="col-12 col-lg-3">
                 <div class="card border-0 p-3 shadow-sm sticky-top" style="top: 20px;">
-                    <button class="btn btn-primary btn-lg w-100 fw-bold mb-3"><i class="bi bi-plus-circle-fill me-2"></i>Laporan Baru</button>
+                    <button class="btn btn-primary btn-lg w-100 fw-bold mb-3" onclick="openModalNewReport()"><i class="bi bi-plus-circle-fill me-2"></i>Laporan Baru</button>
+                    <hr>
+                    <h6 class="fw-bold mb-3 text-muted">Statistik Laporan Saya</h6>
+                    <div class="d-flex justify-content-between mb-2"><span>Draft:</span> <span class="fw-bold" id="statDraft">0</span></div>
+                    <div class="d-flex justify-content-between mb-2"><span>Diproses:</span> <span class="fw-bold text-warning" id="statProses">0</span></div>
+                    <div class="d-flex justify-content-between"><span>Selesai:</span> <span class="fw-bold text-success" id="statSelesai">0</span></div>
                 </div>
             </aside>
+            
             <section class="col-12 col-lg-6">
-                <div class="card border-0 p-5 shadow-sm text-center text-muted border-dashed">
-                    <i class="bi bi-inbox fs-1"></i>
-                    <h5 class="mt-3">Selamat Datang!</h5>
-                    <p class="small">Koneksi API untuk data laporan akan diimplementasikan pada Lab 12.</p>
+                <ul class="nav nav-pills mb-4 nav-fill shadow-sm rounded bg-white p-2">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="tabMyReports" onclick="switchTab('my_reports')">Laporan Saya</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" id="tabFeed" onclick="switchTab('feed')">Feed Kota</button>
+                    </li>
+                </ul>
+
+                <div id="listContainer">
+                    <div class="text-center p-5"><div class="spinner-border text-primary" role="status"></div></div>
                 </div>
+                
+                <div id="paginationContainer" class="mt-4"></div>
             </section>
+            
             <aside class="col-lg-3 d-none d-lg-block">
                 <div class="card border-0 p-3 shadow-sm sticky-top" style="top: 20px;">
                     <h6 class="fw-bold"><i class="bi bi-info-circle-fill text-primary me-2"></i>Pengumuman</h6>
+                    <p class="small text-muted mt-2">Gunakan portal ini untuk melaporkan masalah infrastruktur dan layanan kota secara langsung.</p>
                 </div>
             </aside>
         </div>
     `
 };
 
+function switchTab(tabName) {
+    const btnMyReports = document.getElementById('tabMyReports');
+    const btnFeed = document.getElementById('tabFeed');
+    
+    if (tabName === 'my_reports') {
+        btnMyReports.classList.add('active');
+        btnFeed.classList.remove('active');
+    } else {
+        btnFeed.classList.add('active');
+        btnMyReports.classList.remove('active');
+    }
+    
+    if (typeof loadDashboardData === 'function') {
+        loadDashboardData(tabName, 1);
+    }
+}
+
 function handleRouting() {
     const hash = window.location.hash || '#login'; 
-    document.getElementById('app-content').innerHTML = routes[hash] || routes['#login'];
-    if (hash === '#login' && typeof setupLoginForm === 'function') setupLoginForm();
+    const appContent = document.getElementById('app-content');
+    
+    if (appContent) {
+        appContent.innerHTML = routes[hash] || routes['#login'];
+        
+        if (hash === '#login' && typeof setupLoginForm === 'function') {
+            setupLoginForm();
+        } else if (hash === '#dashboard' && typeof loadDashboardData === 'function') {
+            loadDashboardData('my_reports', 1);
+        }
+    }
 }
 
 window.addEventListener('hashchange', handleRouting);
