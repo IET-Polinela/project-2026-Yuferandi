@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema  # <-- Import untuk Lab 14
 from .models import Report
 from .serializers import ReportSerializer
 
@@ -131,6 +132,9 @@ def api_reports(request):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
+
+# <-- TAMBAHAN LAB 14: Menyembunyikan endpoint dari Swagger/Scalar -->
+@extend_schema(exclude=True)  
 @api_view(['GET', 'PUT', 'DELETE'])
 def api_report_detail(request, pk):
     report = get_object_or_404(Report, pk=pk)
