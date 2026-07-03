@@ -91,7 +91,15 @@ function switchTab(tabName) {
 function handleRouting() {
     const hash = window.location.hash || '#login'; 
     const appContent = document.getElementById('app-content');
-    
+    const accessToken = localStorage.getItem('access_token');
+
+    // Jika pengguna belum login dan mencoba mengakses dashboard,
+    // redirect ke halaman login.
+    if (hash === '#dashboard' && !accessToken) {
+        window.location.hash = '#login';
+        return;
+    }
+
     if (appContent) {
         appContent.innerHTML = routes[hash] || routes['#login'];
         

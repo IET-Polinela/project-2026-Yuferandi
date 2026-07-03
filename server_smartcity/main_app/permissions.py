@@ -12,17 +12,21 @@ class SmartCityRolePermission(permissions.BasePermission):
         # Mengizinkan siapa saja melihat detail laporan (Read-Only)
         if request.method in permissions.SAFE_METHODS:
             return True
+
+        if obj.status == 'RESOLVED':
+            # Laporan RESOLVED bersifat read-only untuk semua pengguna
+            return False
           
         if request.method == 'DELETE':
             # Admin dilarang menghapus. Citizen hanya hapus miliknya saat DRAFT
             if request.user.is_staff:
-                return False 
+                return False
             return obj.reporter == request.user and obj.status == 'DRAFT'
           
         if request.method in ['PUT', 'PATCH']:
-            # Admin diizinkan lolos untuk edit status. Citizen hanya edit miliknya saat DRAFT
+            # Admin hanya boleh mengubah status, warga hanya boleh modifikasi DRAFT miliknya
             if request.user.is_staff:
-                return True 
+                return True
             return obj.reporter == request.user and obj.status == 'DRAFT'
           
         return False

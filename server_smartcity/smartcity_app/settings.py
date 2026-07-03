@@ -13,6 +13,8 @@ SECRET_KEY = 'django-insecure-%6p#ia%obojq(8f2^upcj6ay4$38n0afgf^&gu+-ju1dt+dxy0
 
 DEBUG = True
 
+CORS_ALLOW_ALL_ORIGINS = True
+
 # Izinkan akses dari semua host
 ALLOWED_HOSTS = ['*']
 
@@ -128,3 +130,7 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://103.151.63.85:8001',
+]

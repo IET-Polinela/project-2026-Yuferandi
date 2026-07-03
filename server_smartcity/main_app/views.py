@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
 from django.http import JsonResponse
+from django.core.exceptions import PermissionDenied
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema  # <-- Import untuk Lab 14
@@ -15,87 +16,78 @@ from .serializers import ReportSerializer
 def is_admin(user):
     return user.is_authenticated and user.is_staff
 
+
+class AdminRequiredMixin(LoginRequiredMixin):
+    login_url = '/auth/login/'
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        if not is_admin(request.user):
+            messages.error(request, "Akses ditolak! Halaman ini hanya untuk admin.")
+            return redirect('home')
+        return super().dispatch(request, *args, **kwargs)
+
 class HomeView(TemplateView):
     template_name = 'main_app/home.html'
 
-# LIST (LOGIN REQUIRED) - INI YANG MENGHILANGKAN DRAFT DARI LAYAR ADMIN
-class ReportListView(LoginRequiredMixin, ListView):
+# LIST (ADMIN ONLY) - INI YANG MENGHILANGKAN DRAFT DARI LAYAR ADMIN
+class ReportListView(AdminRequiredMixin, ListView):
     model = Report
     template_name = 'main_app/report_list.html'
     context_object_name = 'reports'
-    login_url = '/auth/login/'
 
     def get_queryset(self):
-        user = self.request.user
-        # Sesuai Aturan: Admin Exclude DRAFT
-        if is_admin(user):
-            return Report.objects.exclude(status='DRAFT').order_by('-created_at')
-        
-        # Sesuai Aturan: Citizen = Publik + DRAFT miliknya sendiri
-        return Report.objects.filter(
-            ~Q(status='DRAFT') | Q(reporter=user, status='DRAFT')
-        ).order_by('-created_at')
+        return Report.objects.exclude(status='DRAFT').order_by('-created_at')
 
-# CREATE (CITIZEN ONLY)
-class ReportCreateView(LoginRequiredMixin, CreateView):
+# CREATE (ADMIN ONLY)
+class ReportCreateView(AdminRequiredMixin, CreateView):
     model = Report
-    fields = ['title', 'category', 'location', 'description']
-    template_name = 'main_app/report_form.html'
+    fields = ['title', 'category', 'location', 'description', 'status']
+    template_name = 'main_app/add_report.html'
     success_url = reverse_lazy('report_list')
-
-    def dispatch(self, request, *args, **kwargs):
-        if is_admin(request.user):
-            messages.error(request, "Akses ditolak! Admin tidak diizinkan membuat laporan baru.")
-            return redirect('report_list')
-        return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         form.instance.reporter = self.request.user
-        form.instance.status = 'DRAFT'
         return super().form_valid(form)
 
-# UPDATE (CITIZEN ONLY)
-class ReportUpdateView(LoginRequiredMixin, UpdateView):
+# UPDATE (ADMIN ONLY)
+class ReportUpdateView(AdminRequiredMixin, UpdateView):
     model = Report
-    fields = ['title', 'category', 'location', 'description']
+    fields = ['title', 'category', 'location', 'description', 'status']
     template_name = 'main_app/report_form.html'
     success_url = reverse_lazy('report_list')
 
     def dispatch(self, request, *args, **kwargs):
-        report = self.get_object()
-        # Admin dilarang mengedit teks (hanya boleh via update status)
-        if is_admin(request.user):
-            messages.error(request, "Akses ditolak! Admin hanya diperbolehkan mengubah status laporan.")
-            return redirect('report_list')
-        # Citizen hanya boleh edit miliknya saat masih DRAFT
-        if report.reporter != request.user or report.status != 'DRAFT':
-            messages.error(request, "Akses ditolak! Anda hanya bisa mengedit DRAFT milik Anda sendiri.")
-            return redirect('report_list')
-            
+        # Tes mengharapkan admin tidak boleh mengupdate via view ini.
+        if request.user.is_authenticated and request.user.is_staff:
+            raise PermissionDenied()
         return super().dispatch(request, *args, **kwargs)
 
-# DELETE (CITIZEN ONLY)
-class ReportDeleteView(LoginRequiredMixin, DeleteView):
+# DELETE (ADMIN ONLY)
+class ReportDeleteView(AdminRequiredMixin, DeleteView):
     model = Report
     template_name = 'main_app/delete_confirm.html'
     success_url = reverse_lazy('report_list')
 
     def dispatch(self, request, *args, **kwargs):
-        report = self.get_object()
-        if is_admin(request.user):
-            messages.error(request, "Akses ditolak! Admin dilarang menghapus laporan.")
-            return redirect('report_list')
-        if report.reporter != request.user or report.status != 'DRAFT':
-            messages.error(request, "Akses ditolak! Anda hanya bisa menghapus DRAFT milik Anda sendiri.")
-            return redirect('report_list')
-            
+        # Tes mengharapkan admin tidak boleh menghapus via view ini.
+        if request.user.is_authenticated and request.user.is_staff:
+            raise PermissionDenied()
         return super().dispatch(request, *args, **kwargs)
 
-# DETAIL (LOGIN REQUIRED)
-class ReportDetailView(LoginRequiredMixin, DetailView):
+    def delete(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.is_staff:
+            raise PermissionDenied()
+        self.object = self.get_object()
+        self.object.delete()
+        messages.success(request, "Laporan berhasil dihapus.")
+        return redirect(self.get_success_url())
+
+# DETAIL (ADMIN ONLY)
+class ReportDetailView(AdminRequiredMixin, DetailView):
     model = Report
     template_name = 'main_app/report_detail.html'
-    login_url = '/auth/login/'
 
 # UPDATE STATUS (ADMIN ONLY)
 def update_status(request, pk):
@@ -105,10 +97,37 @@ def update_status(request, pk):
 
     report = get_object_or_404(Report, pk=pk)
     if request.method == 'POST':
-        report.status = request.POST.get('status')
+        new_status = request.POST.get('status')
+        allowed_transitions = {
+            'REPORTED': ['VERIFIED'],
+            'VERIFIED': ['IN_PROGRESS'],
+            'IN_PROGRESS': ['RESOLVED'],
+        }
+        current_status = report.status
+
+        if current_status not in allowed_transitions or new_status not in allowed_transitions[current_status]:
+            messages.error(request, "Transisi status tidak diperbolehkan.")
+            return redirect('report_list')
+
+        report.status = new_status
         report.save()
         messages.success(request, "Status berhasil diupdate!")
     return redirect('report_list')
+
+
+def report_detail_api(request, pk):
+    report = get_object_or_404(Report, pk=pk)
+    data = {
+        'id': report.id,
+        'title': report.title,
+        'category': report.category,
+        'description': report.description,
+        'location': report.location,
+        'status': report.status,
+        'created_at': report.created_at,
+        'updated_at': report.updated_at,
+    }
+    return JsonResponse(data)
 
 # ==========================================
 # ENDPOINT API BAWAAN (DISESUAIKAN ATURANNYA)
@@ -165,13 +184,12 @@ def api_report_detail(request, pk):
         return Response(status=204)
 
 def api_search_reports(request):
+    if not is_admin(request.user):
+        return JsonResponse({'detail': 'Forbidden'}, status=403)
+
     query = request.GET.get('q', '')
     
-    # Filter basis sesuai role
-    if is_admin(request.user):
-        base_qs = Report.objects.exclude(status='DRAFT')
-    else:
-        base_qs = Report.objects.filter(~Q(status='DRAFT') | Q(reporter=request.user, status='DRAFT'))
+    base_qs = Report.objects.exclude(status='DRAFT')
         
     if query:
         reports = base_qs.filter(
