@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic.base import RedirectView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from usermanagement_24782033.api_views import RegisterView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -10,6 +11,7 @@ urlpatterns = [
     path('', include('main_app.urls')),
     path('about/', include('about.urls')),
     path('contacts/', include('contacts.urls')),
+    path('login/', RedirectView.as_view(url='/auth/login/', permanent=False)),
     path('auth/', include('usermanagement_24782033.urls')),
     path('dashboard/', include('dashboard.urls')),
 

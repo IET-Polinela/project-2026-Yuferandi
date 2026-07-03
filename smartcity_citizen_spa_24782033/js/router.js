@@ -15,31 +15,32 @@ const routes = {
         <div class="row g-4">
             <aside class="col-12 col-lg-3">
                 <div class="card border-0 p-3 shadow-sm sticky-top" style="top: 20px;">
-                    <button class="btn btn-primary btn-lg w-100 fw-bold mb-3" onclick="openModalNewReport()">
+                    <button id="btnBukaModal" class="btn btn-primary btn-lg w-100 fw-bold mb-3" onclick="openModalNewReport()">
                         <i class="bi bi-plus-circle-fill me-2"></i>Laporan Baru
                     </button>
                     <hr>
-                    <h6 class="fw-bold mb-3 text-muted">Statistik Laporan Saya</h6>
-                    
-                    <div class="d-flex justify-content-between mb-2">
-                        <span><i class="bi bi-file-earmark me-2"></i>Draft:</span> 
-                        <span class="fw-bold text-secondary" id="statDraft">0</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span><i class="bi bi-megaphone me-2"></i>Reported:</span> 
-                        <span class="fw-bold text-info" id="statReported">0</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span><i class="bi bi-patch-check me-2"></i>Verified:</span> 
-                        <span class="fw-bold text-warning" id="statVerified">0</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span><i class="bi bi-gear-wide-connected me-2"></i>In Progress:</span> 
-                        <span class="fw-bold text-primary" id="statInProgress">0</span>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span><i class="bi bi-check-circle me-2"></i>Resolved:</span> 
-                        <span class="fw-bold text-success" id="statResolved">0</span>
+                    <div id="summaryStats" class="card border-0 p-3 shadow-sm mb-3">
+                        <h6 class="fw-bold mb-3 text-muted">Ringkasan Statistik</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span><i class="bi bi-file-earmark me-2"></i>Draft</span>
+                            <span class="badge bg-secondary" id="statDraft">0</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span><i class="bi bi-megaphone me-2"></i>Reported</span>
+                            <span class="badge bg-info text-dark" id="statReported">0</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span><i class="bi bi-patch-check me-2"></i>Verified</span>
+                            <span class="badge bg-warning text-dark" id="statVerified">0</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span><i class="bi bi-gear-wide-connected me-2"></i>In Progress</span>
+                            <span class="badge bg-primary" id="statInProgress">0</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-check-circle me-2"></i>Resolved</span>
+                            <span class="badge bg-success" id="statResolved">0</span>
+                        </div>
                     </div>
                 </div>
             </aside>
@@ -50,7 +51,7 @@ const routes = {
                         <button class="nav-link active" id="tabMyReports" onclick="switchTab('my_reports')">Laporan Saya</button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" id="tabFeed" onclick="switchTab('feed')">Feed Kota</button>
+                        <button class="nav-link" id="tabFeedKota" onclick="switchTab('feed')">Feed Kota</button>
                     </li>
                 </ul>
 
@@ -73,8 +74,12 @@ const routes = {
 
 function switchTab(tabName) {
     const btnMyReports = document.getElementById('tabMyReports');
-    const btnFeed = document.getElementById('tabFeed');
+    const btnFeed = document.getElementById('tabFeedKota');
     
+    if (!btnMyReports || !btnFeed) {
+        return;
+    }
+
     if (tabName === 'my_reports') {
         btnMyReports.classList.add('active');
         btnFeed.classList.remove('active');

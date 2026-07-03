@@ -106,12 +106,13 @@ function renderList() {
             : '';
 
         html += `
-            <div class="card mb-3 shadow-sm border-0">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                         <span class="badge ${statusBadgeColor}">${report.status}</span>
-                         <small class="text-muted">${new Date(report.updated_at).toLocaleDateString()}</small>
-                    </div>
+            <div class="col mb-3">
+                <div class="card mb-3 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                             <span class="badge ${statusBadgeColor}">${report.status}</span>
+                             <small class="text-muted">${new Date(report.updated_at).toLocaleDateString()}</small>
+                        </div>
                     <h5 class="card-title fw-bold">${report.title}</h5>
                     <h6 class="card-subtitle mb-3 text-muted"><i class="bi bi-geo-alt"></i> ${report.location}</h6>
                     <p class="card-text">${report.description}</p>
@@ -205,10 +206,10 @@ function editDraft(id) {
     if (report) {
         editingReportId = id; 
         
-        document.getElementById('title').value = report.title;
-        document.getElementById('category').value = report.category;
-        document.getElementById('location').value = report.location;
-        document.getElementById('description').value = report.description;
+        document.getElementById('inputTitle').value = report.title;
+        document.getElementById('inputCategory').value = report.category;
+        document.getElementById('inputLocation').value = report.location;
+        document.getElementById('inputDescription').value = report.description;
         
         document.getElementById('reportModalLabel').innerHTML = '<i class="bi bi-pencil me-2"></i>Edit Draft Laporan';
         reportModalInstance.show();
@@ -218,11 +219,11 @@ function editDraft(id) {
 // Submit transaksi data form ke backend
 async function submitReportData(statusTarget) {
     const payload = {
-        title: document.getElementById('title').value,
-        category: document.getElementById('category').value,
-        location: document.getElementById('location').value,
-        description: document.getElementById('description').value,
-        status: statusTarget 
+            title: document.getElementById('inputTitle').value,
+            category: document.getElementById('inputCategory').value,
+            location: document.getElementById('inputLocation').value,
+            description: document.getElementById('inputDescription').value,
+            status: statusTarget,
     };
 
     if (!payload.title || !payload.category || !payload.location || !payload.description) {

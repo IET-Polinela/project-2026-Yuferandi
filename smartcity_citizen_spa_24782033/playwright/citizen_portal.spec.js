@@ -154,11 +154,15 @@ async function loginAdmin(page, username, password) {
     await page.locator('input[name="username"]').fill(username);
     await page.locator('input[name="password"]').fill(password);
 
-    // Klik tombol submit login dan tunggu hingga navigasi/redirect selesai
-    await Promise.all([
-        page.waitForNavigation({ waitUntil: 'networkidle', timeout: 15000 }),
-        page.locator('button[type="submit"]').click()
-    ]);
+    // Klik tombol submit login dan tunggu hingga navigasi/redirect selesai.
+    // Beberapa template Django mungkin tidak menyertakan type="submit" secara eksplisit,
+    // jadi kita klik tombol yang berisi teks Login jika selector pertama tidak ditemukan.
+    const loginButton = page.locator('button[type="submit"], button:has-text("Login")').first();
+
+    await loginButton.click();
+
+    // Pastikan login berhasil: URL tidak lagi mengandung /login/
+    await page.waitForURL(url => !url.toString().includes('/login/'), { timeout: 15000 });
 }
 
 /**
